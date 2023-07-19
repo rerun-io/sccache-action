@@ -7,6 +7,9 @@ inputs:
   token:
     description: "Used to pull the latest release from sccache. When running this action outside of github.com, you have to pass a personal access token for github.com."
     default: "${{ github.server_url == 'https://github.com' && github.token || '' }}"
+  use_gcs:
+    required: false
+    type: boolean
   gcs_bucket:
     description: "Use GCS as a cache instead of GHA"
     required: false

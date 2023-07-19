@@ -45,10 +45,11 @@ async function setup() {
   }
 
   let gcs: Gcs | null = null;
-  if (core.getInput('gcs_bucket')) {
+  if (core.getBooleanInput('use_gcs')) {
     const bucket = core.getInput('gcs_bucket');
     const read_only = core.getBooleanInput('gcs_read_only');
     gcs = {bucket, read_only};
+    core.info(`using gcs ${bucket}, ${read_only}`);
   }
 
   core.info(`try to setup sccache version: ${version}`);
