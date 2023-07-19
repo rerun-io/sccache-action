@@ -114,7 +114,6 @@ async function setup() {
       conf,
       'utf-8'
     );
-    core.exportVariable('SCCACHE_CONF', '.sccache');
   } else {
     // Expose the gha cache related variable to make users easier to
     // integrate with gha support.
