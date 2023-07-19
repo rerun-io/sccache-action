@@ -103,11 +103,13 @@ async function setup() {
   core.exportVariable('SCCACHE_PATH', `${sccacheHome}/sccache`);
 
   if (gcs) {
-    core.exportVariable('SCCACHE_GCS_BUCKET', gcs.bucket);
-    core.exportVariable(
-      'SCCACHE_GCS_RW_MODE',
-      gcs.read_only ? 'READ_ONLY' : 'READ_WRITE'
-    );
+    let conf = [
+      '[cache.gcs]',
+      `rw_mode = "${gcs.read_only ? 'READ_ONLY' : 'READ_WRITE'}"`,
+      `bucket = "${gcs.bucket}`
+    ].join('\n');
+    await fs.promises.writeFile('.sccache', conf, 'utf-8');
+    core.exportVariable('SCCACHE_CONF', '.sccache');
   } else {
     // Expose the gha cache related variable to make users easier to
     // integrate with gha support.
