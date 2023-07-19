@@ -25,6 +25,11 @@ import * as fs from 'fs';
 
 import * as crypto from 'crypto';
 
+type Gcs = {
+  bucket: string;
+  read_only: boolean;
+};
+
 async function setup() {
   let version = core.getInput('version');
   if (version.length === 0) {
@@ -37,6 +42,14 @@ async function setup() {
     });
     version = release.data.tag_name;
   }
+
+  let gcs: Gcs | null = null;
+  if (core.getInput('gcs_bucket')) {
+    const bucket = core.getInput('gcs_bucket');
+    const read_only = core.getBooleanInput('gcs_read_only');
+    gcs = {bucket, read_only};
+  }
+
   core.info(`try to setup sccache version: ${version}`);
 
   const filename = getFilename(version);
@@ -89,13 +102,24 @@ async function setup() {
   // Expose the sccache path as env.
   core.exportVariable('SCCACHE_PATH', `${sccacheHome}/sccache`);
 
-  // Expose the gha cache related variable to make users easier to
-  // integrate with gha support.
-  core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-  core.exportVariable(
-    'ACTIONS_RUNTIME_TOKEN',
-    process.env.ACTIONS_RUNTIME_TOKEN || ''
-  );
+  if (gcs) {
+    core.exportVariable('SCCACHE_GCS_BUCKET', gcs.bucket);
+    core.exportVariable(
+      'SCCACHE_GCS_RW_MODE',
+      gcs.read_only ? 'READ_ONLY' : 'READ_WRITE'
+    );
+  } else {
+    // Expose the gha cache related variable to make users easier to
+    // integrate with gha support.
+    core.exportVariable(
+      'ACTIONS_CACHE_URL',
+      process.env.ACTIONS_CACHE_URL || ''
+    );
+    core.exportVariable(
+      'ACTIONS_RUNTIME_TOKEN',
+      process.env.ACTIONS_RUNTIME_TOKEN || ''
+    );
+  }
 }
 
 function getFilename(version: string): Error | string {

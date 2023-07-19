@@ -1,4 +1,3 @@
----
 name: "Sccache Action"
 description: "Setup sccache action"
 author: "mozilla"
@@ -7,7 +6,16 @@ inputs:
     description: "The installed sccache version. Use the latest version of sccache if not specified."
   token:
     description: "Used to pull the latest release from sccache. When running this action outside of github.com, you have to pass a personal access token for github.com."
-    default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
+    default: "${{ github.server_url == 'https://github.com' && github.token || '' }}"
+  gcs_bucket:
+    description: "Use GCS as a cache instead of GHA"
+    required: false
+    type: string
+  gcs_read_only:
+    description: "SCCACHE_GCS_RW_MODE=READ_ONLY"
+    type: boolean
+    required: false
+    default: false
 runs:
   using: "node16"
   main: "dist/setup/index.js"
