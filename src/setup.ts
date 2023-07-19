@@ -112,7 +112,7 @@ async function setup() {
     let conf = [
       '[cache.gcs]',
       `rw_mode = "${gcs.read_only ? 'READ_ONLY' : 'READ_WRITE'}"`,
-      `bucket = "${gcs.bucket}`
+      `bucket = "${gcs.bucket}"`
     ].join('\n');
     await fs.promises.writeFile(conf_path, conf, 'utf-8');
   } else {
