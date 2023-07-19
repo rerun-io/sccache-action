@@ -14,6 +14,7 @@
 
 import * as core from '@actions/core';
 import * as os from 'os';
+import * as path from 'path';
 import {
   downloadTool,
   extractTar,
@@ -106,6 +107,7 @@ async function setup() {
 
   if (gcs) {
     let conf_path = `${os.homedir()}/.config/sccache/config`;
+    await fs.promises.mkdir(path.basename(conf_path), {recursive: true});
     core.info(`writing gcs config to ${conf_path}`);
     let conf = [
       '[cache.gcs]',
