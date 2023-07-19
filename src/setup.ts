@@ -107,7 +107,7 @@ async function setup() {
 
   if (gcs) {
     let conf_path = `${os.homedir()}/.config/sccache/config`;
-    await fs.promises.mkdir(path.basename(conf_path), {recursive: true});
+    await fs.promises.mkdir(path.dirname(conf_path), {recursive: true});
     core.info(`writing gcs config to ${conf_path}`);
     let conf = [
       '[cache.gcs]',
