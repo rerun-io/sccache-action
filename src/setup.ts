@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import * as core from '@actions/core';
+import * as os from 'os';
 import {
   downloadTool,
   extractTar,
@@ -108,7 +109,11 @@ async function setup() {
       `rw_mode = "${gcs.read_only ? 'READ_ONLY' : 'READ_WRITE'}"`,
       `bucket = "${gcs.bucket}`
     ].join('\n');
-    await fs.promises.writeFile('.sccache', conf, 'utf-8');
+    await fs.promises.writeFile(
+      `${os.homedir()}/.config/sccache/config`,
+      conf,
+      'utf-8'
+    );
     core.exportVariable('SCCACHE_CONF', '.sccache');
   } else {
     // Expose the gha cache related variable to make users easier to
