@@ -20,7 +20,7 @@ inputs:
     required: false
     default: false
 runs:
-  using: "node16"
+  using: "node20"
   main: "dist/setup/index.js"
   post: "dist/show_stats/index.js"
 branding:

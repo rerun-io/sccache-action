@@ -19,13 +19,26 @@ Just copy and paste the following in your GitHub action:
   uses: mozilla-actions/sccache-action@v0.0.3
 ```
 
+### Conditionally run cache and enable it
+
+```
+- name: Run sccache-cache only on non-release runs
+  if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
+  uses: mozilla-actions/sccache-action@v0.0.3
+- name: Set Rust caching env vars only on non-release runs
+  if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
+  run: |
+    echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
+    echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
+```
+
 ### Specify a given version of sccache
 
 ```
 - name: Run sccache-cache
   uses: mozilla-actions/sccache-action@v0.0.3
   with:
-    version: "v0.5.2"
+    version: "v0.7.4"
 ```
 
 ### To get the execution stats
@@ -68,9 +81,9 @@ With cmake, add the following argument:
 With configure, call it with:
 ```
 # With gcc
-./configure CC="sccache gcc" CXX=sccache gcc"
+./configure CC="sccache gcc" CXX="sccache gcc"
 # With clang
-./configure CC="sccache clang" CXX=sccache clang"
+./configure CC="sccache clang" CXX="sccache clang"
 ```
 
 ## Prepare a new release
