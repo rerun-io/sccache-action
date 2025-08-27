@@ -49,7 +49,7 @@ async function setup() {
     const bucket = core.getInput('gcs_bucket');
     const read_only = core.getBooleanInput('gcs_read_only');
     gcs = {bucket, read_only};
-    core.info(`using gcs ${bucket}, ${read_only}`);
+    core.info(`using gcs ${bucket}, read-only ${read_only}`);
   }
 
   core.info(`try to setup sccache version: ${version}`);
@@ -123,25 +123,41 @@ async function setup() {
   await write_cargo_config(sccache_path);
 }
 
+function get_sccache_config_path(): string {
+  // See https://github.com/mozilla/sccache/blob/main/docs/Configuration.md#file
+  if (process.env.SCCACHE_CONF) {
+    return process.env.SCCACHE_CONF;
+  }
+
+  switch (process.platform) {
+    case 'darwin':
+      return `${os.homedir()}/Library/Application Support/Mozilla.sccache/config`;
+    case 'win32':
+      return `${process.env.APPDATA}\\Mozilla\\sccache\\config\\config`;
+    case 'linux':
+    default:
+      return `${os.homedir()}/.config/sccache/config`;
+  }
+}
+
 async function write_gcs_config(gcs: Gcs) {
   // write gcs info into sccache config
-  let sccache_conf_path = `${os.homedir()}/.config/sccache/config`;
+  let sccache_conf_path = get_sccache_config_path();
   await fs.promises.mkdir(path.dirname(sccache_conf_path), {recursive: true});
 
-  core.info(`writing gcs config to ${sccache_conf_path}`);
-  await fs.promises.writeFile(
-    sccache_conf_path,
-    toml.stringify({
-      cache: {
-        gcs: {
-          rw_mode: gcs.read_only ? 'READ_ONLY' : 'READ_WRITE',
-          bucket: gcs.bucket,
-          key_prefix: '_sccache'
-        }
+  const config = toml.stringify({
+    cache: {
+      gcs: {
+        rw_mode: gcs.read_only ? 'READ_ONLY' : 'READ_WRITE',
+        bucket: gcs.bucket,
+        key_prefix: '_sccache'
       }
-    }),
-    'utf-8'
-  );
+    }
+  });
+
+  core.info(`writing gcs config to ${sccache_conf_path}`);
+  core.info(`config contents:\n${config}`);
+  await fs.promises.writeFile(sccache_conf_path, config, 'utf-8');
 }
 
 async function write_cargo_config(sccache_path: string) {
